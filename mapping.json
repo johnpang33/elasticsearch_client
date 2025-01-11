@@ -1,0 +1,44 @@
+{
+    "mappings": {
+        "properties": {
+            "datetime": {
+                "type": "date",
+                "format": "yyyy-MM-dd HH:mm"
+            },
+            "debit/credit": {
+                "type": "keyword"
+            },
+            "payment_type": {
+                "type": "keyword"
+            },
+            "amount": {
+                "type": "integer"
+            },
+            "currency": {
+                "type": "keyword"
+            },
+            "item": {
+                "type": "text"
+            },
+            "store": {
+                "type": "keyword"
+            },
+            "location": {
+                "type": "keyword"
+            },
+            "category": {
+                "type": "keyword"
+            },
+            "sub_category": {
+                "type": "keyword"
+            },
+            "pillar": {
+                "type": "keyword"
+            },
+            "regularity": {
+                "type": "keyword"
+            }
+        }
+    }
+}
+

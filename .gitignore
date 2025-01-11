@@ -3,4 +3,14 @@ env/
 
 config.yaml
 
+# Ignore CSV files
+*.csv
+
+# Ignore Excel files
+*.xls
+*.xlsx
+*.xlsm
+
+# Ignore Jupyter Notebook files
+*.ipynb
 

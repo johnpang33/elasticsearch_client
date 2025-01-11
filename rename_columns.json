@@ -1,0 +1,15 @@
+{
+    "Date": "date",
+    "Debit/Credit": "debit/credit",
+    "Payment": "payment_type",
+    "Category": "category",
+    "Sub-Category": "sub_category",
+    "Pillar": "pillar",
+    "Regularity": "regularity",
+    "Location": "location",
+    "Store": "store",
+    "Item": "item",
+    "$": "amount",
+    "currency": "currency",
+    "Time": "time"
+}

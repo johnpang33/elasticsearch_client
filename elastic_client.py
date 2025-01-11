@@ -30,7 +30,7 @@ class ElasticSearchClient:
         self.port = es_config.get("port", 9200)  # Default to 9200 if not found
         self.username = es_config.get("username", "")  # Default to empty if not found
         self.password = es_config.get("password", "")  # Default to empty if not found
-        self.scheme = es_config.get('scheme', 'https')
+        self.scheme = es_config.get('scheme', 'https') # Default to https if not found
 
         # Initialize the Elasticsearch client with basic authentication
         if self.username and self.password:
@@ -39,6 +39,7 @@ class ElasticSearchClient:
                 basic_auth=(self.username, self.password),
                 verify_certs=False
             )
+            print("Connected to Elasticsearch...")
         else:
             # If no credentials are provided, use without authentication
             self.client = Elasticsearch([{'host': self.host, 'port': self.port, 'scheme': self.scheme}])
@@ -287,4 +288,117 @@ class ElasticSearchClient:
             return {"success": success, "failed": failed}
         except Exception as e:
             print(f"Error during bulk indexing: {e}")
+            return {"error": str(e)}
+        
+    def bulk_index_from_df(self, df, index_name, id_column=None):
+        """
+        Bulk index multiple documents from a DataFrame into Elasticsearch.
+
+        Args:
+            df (pd.DataFrame): A DataFrame where each row represents a document.
+            id_column (str): The name of the column to be used as the document '_id'.
+            index_name (str): The name of the Elasticsearch index.
+
+        Returns:
+            dict: A summary of the bulk operation results.
+        """
+        try:
+            # Prepare actions for bulk indexing
+            actions = []
+            for _, row in df.iterrows():
+                doc = row.to_dict()  # Convert the row to a dictionary
+                doc_id = doc.pop(id_column, None)  # Extract the value from the id_column and remove it
+                action = {
+                    "_index": index_name,
+                    "_source": doc
+                }
+                if doc_id:
+                    action["_id"] = doc_id  # Add _id as metadata
+                actions.append(action)
+
+            # Execute bulk indexing
+            success, failed = bulk(self.client, actions, raise_on_error=False, stats_only=False)
+            print(f"Successfully indexed {success} documents.")
+            if failed:
+                print(f"Failed to index {len(failed)} documents. Errors: {failed}")
+            return {"success": success, "failed": failed}
+        except Exception as e:
+            print(f"Error during bulk indexing: {e}")
+            return {"error": str(e)}
+        
+    def create_alias(self, index_name, alias_name):
+        """
+        Create an alias for an Elasticsearch index.
+
+        Args:
+            index_name (str): The name of the Elasticsearch index.
+            alias_name (str): The name of the alias to create.
+
+        Returns:
+            dict: The response from the Elasticsearch client.
+        """
+        try:
+            # Add alias to the index
+            response = self.client.indices.put_alias(index=index_name, name=alias_name)
+            print(f"Alias '{alias_name}' created for index '{index_name}'.")
+            return response
+        except Exception as e:
+            print(f"Error creating alias: {e}")
+            return {"error": str(e)}
+        
+    def smart_search(self, index_name, query= {"match_all": {}}, scroll="2m", size=10000):
+        """
+        Perform a search that dynamically switches between simple search and scroll search 
+        based on the total number of matching records.
+
+        Args:
+            index_name (str): The name of the Elasticsearch index.
+            query (dict): The query to execute in Elasticsearch Query DSL format.
+            scroll (str): The time Elasticsearch should keep the scroll context alive. Default is "2m".
+            size (int): The number of documents to retrieve per scroll batch. Default is 1000.
+
+        Returns:
+            list: A list of all retrieved documents.
+        """
+        try:
+            # Get the count of matching documents
+            count_response = self.client.count(index=index_name, body={"query": query})
+            total_count = count_response["count"]
+
+            print(f"Total matching documents: {total_count}")
+
+            if total_count <= 10000:
+                # Perform a simple search
+                response = self.client.search(index=index_name, body={"query": query, "size": total_count})
+                documents = [hit["_source"] for hit in response["hits"]["hits"]]
+                print(f"Retrieved {len(documents)} documents using simple search.")
+                return {
+                    "total_hits": total_count,
+                    "documents": documents
+                }
+            else:
+                # Perform a scroll search for large datasets
+                print("Using scroll search for large dataset.")
+                documents = []
+                response = self.client.search(index=index_name, body={"query": query}, scroll=scroll, size=size)
+                scroll_id = response["_scroll_id"]
+                hits = response["hits"]["hits"]
+                documents.extend([hit["_source"] for hit in hits])
+
+                while hits:
+                    response = self.client.scroll(scroll_id=scroll_id, scroll=scroll)
+                    scroll_id = response["_scroll_id"]
+                    hits = response["hits"]["hits"]
+                    documents.extend([hit["_source"] for hit in hits])
+
+                # Clear the scroll context
+                self.client.clear_scroll(scroll_id=scroll_id)
+                print(f"Retrieved {len(documents)} documents using scroll search.")
+                return {
+                    "total_hits": total_count,
+                    "documents": documents
+                }
+
+        except Exception as e:
+            print(f"Error during smart search: {e}")
             return {"error": str(e)}

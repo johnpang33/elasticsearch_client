@@ -3,6 +3,7 @@ import yaml
 from datetime import datetime, timedelta
 import random
 import string
+import pytz
 from elastic_client import ElasticSearchClient
 from helper import (
     rename_columns_in_dataframe, 
@@ -35,6 +36,7 @@ def process_df_and_ingest_es():
     FILE_PATH = os.path.join(CURRENT_DIRECTORY, 'rename_columns.json')
     df = rename_columns_in_dataframe(df=df, rename_file=FILE_PATH)
 
+    print('reading dates')
     # Convert the 'Date' column to datetime
     df['date'] = pd.to_datetime(df['date'])
     # Change the year to 2023
@@ -43,11 +45,15 @@ def process_df_and_ingest_es():
     df['time'] = pd.to_datetime(df['time'])
     df['time'] = df['time'].apply(lambda t: t.strftime('%H:%M:%S'))
     df['datetime'] = pd.to_datetime(df['date'] + ' ' + df['time'])
-    df['datetime'] = df['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    df['datetime'] = df['datetime'].dt.tz_localize(pytz.timezone('Asia/Singapore'))
+    print(df['datetime'].head(20))
+    # .astimezone(pytz.utc)  # Add UTC+8 timezone
+    # df['datetime'] = df['datetime'].dt.strftime('%Y-%m-%dT%H:%M:%S%z')
+    print('changed the dates')
 
     df['currency'] = 'SGD'
     df['amount'] = (df['amount'] * 100).astype(int)
-
+    df['amount_to_display'] = (df['amount'] / 100).apply(lambda x: f"{x:.2f}")
 
     df = convert_integer_dataframe(df=df, integer_columns=CONFIG['integer_columns'])
     df = fillna_df(df=df, integer_columns=CONFIG['integer_columns'])
@@ -72,6 +78,7 @@ def process_df_and_ingest_es():
         },
         "mappings": mappings.get("mappings", {})
     }
+    es_client.delete_index(index_name="expenses_2023")
     es_client.create_index(index_name="expenses_2023", settings=index_settings)
 
     es_client.create_alias(index_name="expenses_2023", alias_name="expenses")
@@ -80,5 +87,5 @@ def process_df_and_ingest_es():
 
 
 if __name__ == "__main__":
-    # process_df_and_ingest_es()
-    main()
+    process_df_and_ingest_es()
+    # main()

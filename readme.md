@@ -1,8 +1,10 @@
 ### Example of initialising python -m venv {name_of_environment}
+### Open CMD
 python -m venv env
 
 ### Activate venv
 env\Scripts\activate.bat
+
 
 ### Linux
 # source env/bin/activate.bat
@@ -21,4 +23,5 @@ pip freeze | sed 's/==.*//' > requirements.txt
 
 
 ### Remove virtual env
-rm -r venv
+# Open Git Bash
+rm -r env

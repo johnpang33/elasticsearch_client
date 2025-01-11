@@ -1,6 +1,7 @@
 import os
 import socket
 import yaml
+from pathlib import Path
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError, ConnectionError
 from elasticsearch.helpers import bulk
@@ -10,9 +11,15 @@ warnings.filterwarnings("ignore", message=".*Connecting to.*TLS.*verify_certs=Fa
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)  # Suppress InsecureRequestWarnings
 
 class ElasticSearchClient:
-    def __init__(self, config_file='config.yaml'):
+    def __init__(self):
         # Load configuration from the YAML file
-        with open(config_file, 'r') as file:
+        # CURRENT_DIRECTORY = Path.cwd()
+        CURRENT_DIRECTORY = Path(__file__).parent
+        config_path = Path(CURRENT_DIRECTORY, 'config.yaml')
+        print(config_path)
+        # CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+        # config_path = os.path.join(CURRENT_DIRECTORY, 'config.yaml')
+        with open(config_path, 'r') as file:
             config = yaml.safe_load(file)
         
         # Get the machine's hostname

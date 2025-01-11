@@ -12,5 +12,6 @@ config.yaml
 *.xlsm
 
 # Ignore Jupyter Notebook files
+.ipynb_checkpoints/
 *.ipynb
 

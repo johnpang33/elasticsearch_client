@@ -29,6 +29,7 @@ def process_df_and_ingest_es():
 
     FILE_PATH = os.path.join(CURRENT_DIRECTORY, 'expense_2023.xlsx')
     df = pd.read_excel(FILE_PATH)
+    print(df.info())
     df = df.apply(lambda x: x.astype(str).str.strip() if x.dtype == "object" else x)
     
     FILE_PATH = os.path.join(CURRENT_DIRECTORY, 'rename_columns.json')
@@ -40,9 +41,9 @@ def process_df_and_ingest_es():
     df['date'] = df['date'].apply(lambda x: x.replace(year=2023))
     df['date'] = df['date'].dt.strftime('%Y-%m-%d')
     df['time'] = pd.to_datetime(df['time'])
-    df['time'] = df['time'].apply(lambda t: t.strftime('%H:%M'))
+    df['time'] = df['time'].apply(lambda t: t.strftime('%H:%M:%S'))
     df['datetime'] = pd.to_datetime(df['date'] + ' ' + df['time'])
-    df['datetime'] = df['datetime'].dt.strftime('%Y-%m-%d %H:%M')
+    df['datetime'] = df['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     df['currency'] = 'SGD'
     df['amount'] = (df['amount'] * 100).astype(int)
@@ -79,4 +80,5 @@ def process_df_and_ingest_es():
 
 
 if __name__ == "__main__":
+    # process_df_and_ingest_es()
     main()

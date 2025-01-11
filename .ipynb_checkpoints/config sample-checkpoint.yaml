@@ -1,0 +1,21 @@
+elasticsearch:
+  DESKTOP-9B67VE1:
+    host: "localhost"
+    port: 9200
+    username: "localhost"
+    password: "localhost"
+  localhost:
+    host: "localhost"
+    port: 9200
+    username: "localhost"
+    password: "localhost"
+  mymachine:
+    host: "myhost.local"
+    port: 9200
+    username: "user_mymachine"
+    password: "pass_mymachine"
+  otherserver:
+    host: "otherserver.local"
+    port: 9300
+    username: "user_otherserver"
+    password: "pass_otherserver"

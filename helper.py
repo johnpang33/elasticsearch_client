@@ -71,7 +71,7 @@ def fillna_df(df, integer_columns):
         non_int_columns = [col for col in df.columns if col not in integer_columns]
         
     for col in non_int_columns:
-        df[col] = df[col].replace(['', pd.NA, float('nan')], None)
+        df[col] = df[col].replace(['', pd.NA, float('nan'), 'nan'], None)
     print(f'Filled all columns with NA to " ", (rows, columns): {df.shape}.')
     return df
 

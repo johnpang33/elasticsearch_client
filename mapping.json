@@ -3,7 +3,7 @@
         "properties": {
             "datetime": {
                 "type": "date",
-                "format": "yyyy-MM-dd HH:mm"
+                "format": "yyyy-MM-dd HH:mm:ss"
             },
             "debit/credit": {
                 "type": "keyword"

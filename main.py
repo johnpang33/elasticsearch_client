@@ -79,6 +79,7 @@ def process_df_and_ingest_es():
         "mappings": mappings.get("mappings", {})
     }
     es_client.delete_index(index_name="expenses_2023")
+    es_client.delete_index(index_name="expenses_2024")
     es_client.create_index(index_name="expenses_2023", settings=index_settings)
 
     es_client.create_alias(index_name="expenses_2023", alias_name="expenses")

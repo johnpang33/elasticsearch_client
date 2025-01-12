@@ -12,6 +12,7 @@ warnings.filterwarnings("ignore", category=InsecureRequestWarning)  # Suppress I
 
 class ElasticSearchClient:
     def __init__(self):
+        print("ElasticSearchClient initialized!")
         # Load configuration from the YAML file
         # CURRENT_DIRECTORY = Path.cwd()
         CURRENT_DIRECTORY = Path(__file__).parent
@@ -408,4 +409,83 @@ class ElasticSearchClient:
 
         except Exception as e:
             print(f"Error during smart search: {e}")
+            return {"error": str(e)}
+        
+    def get_cluster_health(self):
+        """
+        Retrieve the health status of the cluster.
+        """
+        try:
+            health = self.client.cluster.health()
+            return health
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_cluster_stats(self):
+        """
+        Retrieve detailed statistics about the cluster.
+        """
+        try:
+            stats = self.client.cluster.stats()
+            return stats
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_nodes_info(self):
+        """
+        Retrieve information about nodes in the cluster.
+        """
+        try:
+            nodes_info = self.client.nodes.info()
+            return nodes_info
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_cluster_settings(self):
+        """
+        Retrieve settings for the cluster.
+        """
+        try:
+            settings = self.client.cluster.get_settings()
+            return settings
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_node_stats(self):
+        """
+        Retrieve stats related to node usage, such as memory and disk.
+        """
+        try:
+            node_stats = self.client.nodes.stats()
+            return node_stats
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_indices_info(self):
+        """
+        Retrieve information about indices, including document count and storage.
+        """
+        try:
+            indices_info = self.client.indices.stats()
+            return indices_info
+        except Exception as e:
+            return {"error": str(e)}
+
+    def get_full_cluster_info(self):
+        """
+        Retrieve a complete set of cluster information.
+        """
+        try:
+            cluster_health = self.get_cluster_health()
+            cluster_stats = self.get_cluster_stats()
+            nodes_info = self.get_nodes_info()
+
+            cluster_info = {
+                "health": cluster_health,
+                "stats": cluster_stats,
+                "nodes": nodes_info
+            }
+
+            return cluster_info
+        except Exception as e:
             return {"error": str(e)}

@@ -4,6 +4,35 @@ import json
 import pandas as pd
 import numpy as np
 
+def parse_es_response(response):
+    """
+    Parse an Elasticsearch response to extract total hits and all `_source` fields.
+    
+    Args:
+        response (dict): The Elasticsearch response object.
+        
+    Returns:
+        dict: A dictionary with `total_hits` and `hits_sources` keys.
+              `total_hits` is the total number of hits.
+              `hits_sources` is a list of `_source` fields for each hit.
+    """
+    try:
+        # Extract total hits
+        total_hits = response.get("hits", {}).get("total", {}).get("value", 0)
+        # Extract all `_source` fields from hits
+        hits_sources = [hit.get("_source", {}) for hit in response.get("hits", {}).get("hits", [])]
+        
+        return {
+            "total_hits": total_hits,
+            "hits_sources": hits_sources,
+        }
+    except Exception as e:
+        print(f"Error parsing Elasticsearch response: {e}")
+        return {
+            "total_hits": 0,
+            "hits_sources": [],
+        }
+
 def rename_columns_in_dataframe(df, rename_file):
     """
     Rename columns in the dataframe based on a source of truth (JSON file).

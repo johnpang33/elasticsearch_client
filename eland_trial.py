@@ -14,9 +14,12 @@ try:
     # Attempt to get the directory of the current file
     CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
     config_path = os.path.join(CURRENT_DIRECTORY, 'config.yaml')
+    # CURRENT_DIRECTORY = Path(__file__).resolve().parent
+    # config_path = CURRENT_DIRECTORY / 'config.yaml'
     print("Config file path constructed via os.")
 except NameError as e:
     # If NameError occurs (likely due to __file__ being undefined), use Path.cwd()
+    # For use in jupyter notebook
     print('__file__ is undefined, switching to pathlib:', e)
     CURRENT_DIRECTORY = Path.cwd()
     config_path = CURRENT_DIRECTORY / 'config.yaml'
